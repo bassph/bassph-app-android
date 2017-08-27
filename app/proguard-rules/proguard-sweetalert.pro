@@ -1,0 +1,2 @@
+-keep class cn.pedant.SweetAlert.** { *; }
+-dontwarn cn.pedant.SweetAlert.**

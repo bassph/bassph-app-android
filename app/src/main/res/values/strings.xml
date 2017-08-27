@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">BASS</string>
+    <string name="reportLabel">TAP BUTTON TO START</string>
+    <string name="successTitle">Success, Thank you</string>
+    <string name="provider">SIM Network : </string>
+    <string name="connection_type">Current Connection : </string>
+    <string name="bandwidth">Bandwidth : </string>
+    <string name="signal">Signal : </string>
+    <string name="testAgain">Test Again</string>
+    <string name="facebook_app_id"></string>
+    <string name="title_activity_maps">Map</string>
+</resources>

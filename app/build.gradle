@@ -1,0 +1,152 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'io.fabric'
+
+repositories {
+    maven { url 'https://jitpack.io' }
+    maven { url 'https://maven.fabric.io/public' }
+    mavenCentral()
+}
+
+// Manifest version information!
+def versionMajor = 4
+def versionMinor = 1
+def versionPatch = 2
+def versionBuild = 0
+
+android {
+
+    signingConfigs {
+        projectbass {
+            keyAlias 'projectbass'
+            keyPassword 'projectbass1234!!'
+            storeFile file('/Users/aar/StudioProjects/projectbass.jks')
+            storePassword 'projectbass1234!!'
+        }
+    }
+
+    buildToolsVersion '25.0.3'
+    compileSdkVersion 25
+
+    applicationVariants.all { variant ->
+        //File Names
+        variant.outputs.each { output ->
+            if (output.outputFile != null && output.outputFile.name.endsWith('.apk')) {
+                def file = output.outputFile
+                def fileName = "${output.outputFile.name.replace(".apk", "")}-${versionMajor}_${versionMinor}_${versionPatch}_${versionBuild}.apk"
+                output.outputFile = new File(file.parent, fileName)
+            }
+        }
+    }
+
+    defaultConfig {
+        applicationId 'org.projectbass.bass'
+        minSdkVersion 17
+        targetSdkVersion 25
+        versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
+        versionName "${versionMajor}.${versionMinor}.${versionPatch}.${versionBuild}"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt')
+            proguardFiles fileTree(dir: 'proguard-rules', include: ['*.pro']).asList().toArray()
+        }
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt')
+            proguardFiles fileTree(dir: 'proguard-rules', include: ['*.pro']).asList().toArray()
+
+        }
+    }
+
+    lintOptions {
+        disable "ResourceType"
+    }
+
+    packagingOptions {
+        exclude 'META-INF/services/javax.annotation.processing.Processor'
+        exclude 'META-INF/rxjava.properties'
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+}
+
+kapt {
+    generateStubs = true
+}
+
+dependencies {
+
+    def supportLibraryVersion = "25.3.1"
+    def playServicesVersion = "11.0.0"
+    def retrofitVersion = "2.1.0"
+
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile "com.android.support:appcompat-v7:$supportLibraryVersion"
+    compile "com.android.support:design:$supportLibraryVersion"
+    compile 'com.android.support:multidex:1.0.1'
+
+    compile "com.google.android.gms:play-services-location:$playServicesVersion"
+    compile "com.google.android.gms:play-services-places:$playServicesVersion"
+    compile "com.google.android.gms:play-services-gcm:$playServicesVersion"
+
+    compile 'com.google.dagger:dagger:2.7'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    kapt 'com.google.dagger:dagger-compiler:2.7'
+    kapt 'com.jakewharton:butterknife-compiler:8.4.0'
+    provided 'javax.annotation:jsr250-api:1.0'
+
+    compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    compile "com.squareup.retrofit2:adapter-rxjava:$retrofitVersion"
+    compile "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
+        transitive = true;
+    }
+
+    compile 'com.evernote:android-job:1.1.11'
+
+    compile 'com.jakewharton.rxbinding:rxbinding:1.0.0'
+    compile 'com.jakewharton.rxbinding:rxbinding-support-v4:1.0.0'
+    compile 'com.jakewharton.rxbinding:rxbinding-appcompat-v7:1.0.0'
+
+    compile 'pl.charmas.android:android-reactive-location:0.10@aar'
+    compile 'com.github.pwittchen:reactivenetwork:0.8.0'
+    compile 'com.github.pwittchen:reactivewifi:0.2.0'
+
+    compile 'com.jakewharton.timber:timber:4.3.1'
+    compile 'com.jakewharton:butterknife:8.4.0'
+    compile 'io.reactivex:rxandroid:1.2.1'
+    compile 'io.reactivex:rxjava:1.1.6'
+
+    compile 'com.skyfishjy.ripplebackground:library:1.0.1'
+    compile 'cn.pedant.sweetalert:library:1.3'
+
+    compile 'com.facebook.android:facebook-android-sdk:4.23.0'
+
+    compile 'com.github.iammert:MaterialIntroView:1.6.0'
+    compile 'com.jonathanfinerty.once:once:1.2.2'
+
+    compile 'io.requery:requery:1.4.0'
+    compile 'io.requery:requery-kotlin:1.4.0'
+    compile 'io.requery:requery-android:1.4.0'
+    kapt 'io.requery:requery-processor:1.4.0'
+    provided 'io.requery:requery-processor:1.1.0'
+    compile 'io.reactivex.rxjava2:rxjava:2.1.2'
+
+    debugCompile 'com.readystatesoftware.chuck:library:1.1.0'
+    releaseCompile 'com.readystatesoftware.chuck:library-no-op:1.1.0'
+    compile 'com.facebook.stetho:stetho:1.5.0'
+    compile 'com.facebook.stetho:stetho-okhttp3:1.5.0'
+
+    compile 'com.google.maps.android:android-maps-utils:0.5+'
+}

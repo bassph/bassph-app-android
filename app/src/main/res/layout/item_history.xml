@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_margin="8dp"
+                android:background="@color/blue_btn_bg_color"
+                android:orientation="vertical"
+                android:padding="16dp"
+                xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TextView
+        android:id="@+id/tv_net_speed_label"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Net Speed: "/>
+
+    <TextView
+        android:id="@+id/netSpeed"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/tv_net_speed_label"
+        tools:text="100 Mbps"/>
+
+    <TextView
+        android:id="@+id/tv_connection_label"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_net_speed_label"
+        android:text="Connection: "/>
+
+    <TextView
+        android:id="@+id/connectionType"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/tv_connection_label"
+        android:layout_toEndOf="@+id/tv_connection_label"
+        tools:text="wifi"/>
+
+    <TextView
+        android:id="@+id/tv_signal_label"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_connection_label"
+        android:text="Signal: "/>
+
+    <TextView
+        android:id="@+id/signal"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/tv_signal_label"
+        android:layout_toEndOf="@+id/tv_signal_label"
+        tools:text="-95"/>
+
+    <TextView
+        android:id="@+id/tv_date_label"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_signal_label"
+        android:visibility="gone"
+        android:text="Date Taken: "/>
+
+    <TextView
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/tv_date_label"
+        android:layout_toEndOf="@+id/tv_date_label"
+        android:visibility="gone"
+        tools:text="September 2017"/>
+
+
+</RelativeLayout>
