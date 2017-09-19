@@ -16,9 +16,6 @@ import java.io.IOException
 import java.net.URL
 
 
-
-
-
 /**
  * Paul Sydney Orozco (@xtrycatchx) on 12/2/17.
  */
@@ -63,20 +60,22 @@ class Sources(private val context: Context) {
             val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
             val cellinfo = telephonyManager.allCellInfo[0]
             var dbm = -666
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 && cellinfo is CellInfoWcdma) {
-                val cellSignalStrengthWcdma = cellinfo.cellSignalStrength
-                dbm = cellSignalStrengthWcdma.dbm
-                signalStrength = "WCDMA"
-            } else if (cellinfo is CellInfoGsm) {
-                val cellSignalStrengthGsm = cellinfo.cellSignalStrength
-                dbm = cellSignalStrengthGsm.dbm
-                signalStrength = "GSM"
-            } else if (cellinfo is CellInfoLte) {
-                val cellSignalStrengthLte = cellinfo.cellSignalStrength
-                signalStrength = "LTE"
-                dbm = cellSignalStrengthLte.dbm
+            if (telephonyManager.simState != TelephonyManager.SIM_STATE_ABSENT) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 && cellinfo is CellInfoWcdma) {
+                    val cellSignalStrengthWcdma = cellinfo.cellSignalStrength
+                    dbm = cellSignalStrengthWcdma.dbm
+                    signalStrength = "WCDMA"
+                } else if (cellinfo is CellInfoGsm) {
+                    val cellSignalStrengthGsm = cellinfo.cellSignalStrength
+                    dbm = cellSignalStrengthGsm.dbm
+                    signalStrength = "GSM"
+                } else if (cellinfo is CellInfoLte) {
+                    val cellSignalStrengthLte = cellinfo.cellSignalStrength
+                    signalStrength = "LTE"
+                    dbm = cellSignalStrengthLte.dbm
+                }
+                signalStrength = "$signalStrength : $dbm"
             }
-            signalStrength = "$signalStrength : $dbm"
 
         } catch (e: Exception) {
             e.printStackTrace()
