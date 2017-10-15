@@ -1,6 +1,6 @@
 # BASS - Bandwidth and Signal Statistics
 
-[BASS PH](http://projectbass.org) aims for a better internet. Help us map the Philippine mobile internet scene. Download the app to measure and send the bandwidth measured.
+[BASS PH](http://projectbass.org) aims for a better internet. Help us map the Philippine mobile internet scene. Download the app to measure and send the bandwidth measured!
 
 It's also on Google Play:
 
