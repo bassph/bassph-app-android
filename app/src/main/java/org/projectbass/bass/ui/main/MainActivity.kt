@@ -71,8 +71,6 @@ class MainActivity : BaseActivity() {
     private var pDialog: SweetAlertDialog? = null
     private var isAlreadyRunningTest: Boolean = false
 
-    private lateinit var smileRatingView: SmileRating
-
     private fun requestCoarseLocationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             requestPermissions(arrayOf(ACCESS_COARSE_LOCATION),
@@ -117,7 +115,6 @@ class MainActivity : BaseActivity() {
 
     private fun initUi() {
         enableAutoMeasure.isChecked = SharedPrefUtil.retrieveFlag(this, "auto_measure")
-        smileRatingView = initSmileRatingView()
     }
 
     private fun showTutorial() {
@@ -228,6 +225,7 @@ class MainActivity : BaseActivity() {
             titleText = "How do you feel about ${data?.operator}?"
             confirmText = "Submit"
             setCancelable(false)
+            val smileRatingView = initSmileRatingView()
             setConfirmClickListener { dialog ->
                 data?.mood = smileRatingView.rating - 3
                 dismissWithAnimation()
