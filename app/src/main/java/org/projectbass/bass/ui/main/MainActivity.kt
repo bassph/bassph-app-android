@@ -33,6 +33,10 @@ import com.facebook.share.model.ShareHashtag
 import com.facebook.share.model.ShareLinkContent
 import com.facebook.share.widget.ShareDialog
 import com.github.pwittchen.reactivewifi.AccessRequester
+import com.hsalf.smilerating.BaseRating
+import com.hsalf.smilerating.SmileRating
+import jonathanfinerty.once.Once
+import kotlinx.android.synthetic.main.activity_main.*
 import org.projectbass.bass.R
 import org.projectbass.bass.flux.action.DataCollectionActionCreator
 import org.projectbass.bass.flux.store.DataCollectionStore
@@ -43,8 +47,6 @@ import org.projectbass.bass.ui.BaseActivity
 import org.projectbass.bass.ui.history.HistoryActivity
 import org.projectbass.bass.ui.map.MapsActivity
 import org.projectbass.bass.utils.SharedPrefUtil
-import jonathanfinerty.once.Once
-import kotlinx.android.synthetic.main.activity_main.*
 import rx.Observable
 import rx.Single
 import rx.android.schedulers.AndroidSchedulers
@@ -68,6 +70,8 @@ class MainActivity : BaseActivity() {
     @Inject lateinit internal var mDataCollectionStore: DataCollectionStore
     private var pDialog: SweetAlertDialog? = null
     private var isAlreadyRunningTest: Boolean = false
+
+    private lateinit var smileRatingView: SmileRating
 
     private fun requestCoarseLocationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -113,6 +117,7 @@ class MainActivity : BaseActivity() {
 
     private fun initUi() {
         enableAutoMeasure.isChecked = SharedPrefUtil.retrieveFlag(this, "auto_measure")
+        smileRatingView = initSmileRatingView()
     }
 
     private fun showTutorial() {
@@ -202,7 +207,7 @@ class MainActivity : BaseActivity() {
                     when (store.action) {
                         DataCollectionActionCreator.ACTION_COLLECT_DATA_S -> {
                             resetView()
-                            postToServer(store.data)
+                            getCarrierUserSatisfaction(store.data)
                         }
                         DataCollectionActionCreator.ACTION_SEND_DATA_S -> showShareResultDialog()
                         DataCollectionActionCreator.ACTION_SEND_DATA_F -> {
@@ -216,6 +221,28 @@ class MainActivity : BaseActivity() {
                     }
                 }) { resetView() }
         )
+    }
+
+    private fun getCarrierUserSatisfaction(data: Data?) {
+        SweetAlertDialog(this, SweetAlertDialog.NORMAL_TYPE).apply {
+            titleText = "How do you feel about ${data?.operator}?"
+            confirmText = "Submit"
+            setCancelable(false)
+            setConfirmClickListener { dialog ->
+                data?.mood = smileRatingView.rating - 3
+                dismissWithAnimation()
+                postToServer(data)
+            }
+            setCustomView(smileRatingView)
+        }.show()
+    }
+
+    fun initSmileRatingView(): SmileRating {
+        return SmileRating(this).apply {
+            selectedSmile = BaseRating.OKAY
+            setNameForSmile(BaseRating.TERRIBLE, "Angry")
+            setNameForSmile(BaseRating.OKAY, "Meh")
+        }
     }
 
     private fun showErrorDialog() {
@@ -344,11 +371,12 @@ class MainActivity : BaseActivity() {
         )
         data?.let {
             SharedPrefUtil.saveTempData(this, it)
-            pDialog = SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE)
-            pDialog?.progressHelper?.barColor = Color.parseColor("#A5DC86")
-            pDialog?.titleText = "Loading"
-            pDialog?.setCancelable(false)
-            pDialog?.show()
+            pDialog = SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE).apply {
+                progressHelper?.barColor = Color.parseColor("#A5DC86")
+                titleText = "Loading"
+                setCancelable(false)
+                show()
+            }
             mDataCollectionActionCreator.sendData(it)
         }
     }
