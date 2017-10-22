@@ -371,11 +371,12 @@ class MainActivity : BaseActivity() {
         )
         data?.let {
             SharedPrefUtil.saveTempData(this, it)
-            pDialog = SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE)
-            pDialog?.progressHelper?.barColor = Color.parseColor("#A5DC86")
-            pDialog?.titleText = "Loading"
-            pDialog?.setCancelable(false)
-            pDialog?.show()
+            pDialog = SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE).apply {
+                progressHelper?.barColor = Color.parseColor("#A5DC86")
+                titleText = "Loading"
+                setCancelable(false)
+                show()
+            }
             mDataCollectionActionCreator.sendData(it)
         }
     }
