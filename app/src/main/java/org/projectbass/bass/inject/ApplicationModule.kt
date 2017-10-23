@@ -52,6 +52,6 @@ class ApplicationModule(private val application: BASS) {
 
     @Provides @PerApplication
     fun providesDatabase(context: Context): Database {
-        return RequeryDatabase(context.applicationContext, "projectbass.db", 1)
+        return RequeryDatabase(context.applicationContext, "projectbass.db", 2)
     }
 }

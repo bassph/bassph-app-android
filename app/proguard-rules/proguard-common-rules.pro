@@ -1,5 +1,7 @@
 # defualt
 -keep class org.projectbass.bass.model.** { *; }
+-dontwarn io.requery.sql.platform.PostgresSQL
+-dontwarn javax.sql.rowset.serial.**
 
 # google play
 -keep class * extends java.util.ListResourceBundle {

@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 apply plugin: 'io.fabric'
 
 repositories {
@@ -11,8 +12,8 @@ repositories {
 
 // Manifest version information!
 def versionMajor = 4
-def versionMinor = 1
-def versionPatch = 2
+def versionMinor = 2
+def versionPatch = 1
 def versionBuild = 0
 
 android {
@@ -52,7 +53,7 @@ android {
 
     buildTypes {
         debug {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt')
             proguardFiles fileTree(dir: 'proguard-rules', include: ['*.pro']).asList().toArray()
         }
@@ -79,7 +80,7 @@ android {
 }
 
 kapt {
-    generateStubs = true
+    correctErrorTypes = true
 }
 
 dependencies {
@@ -137,11 +138,11 @@ dependencies {
     compile 'com.github.iammert:MaterialIntroView:1.6.0'
     compile 'com.jonathanfinerty.once:once:1.2.2'
 
-    compile 'io.requery:requery:1.4.0'
-    compile 'io.requery:requery-kotlin:1.4.0'
-    compile 'io.requery:requery-android:1.4.0'
-    kapt 'io.requery:requery-processor:1.4.0'
-    provided 'io.requery:requery-processor:1.1.0'
+    compile 'io.requery:requery:1.4.1'
+    compile 'io.requery:requery-kotlin:1.4.1'
+    compile 'io.requery:requery-android:1.4.1'
+    kapt 'io.requery:requery-processor:1.4.1'
+    annotationProcessor 'io.requery:requery-processor:1.4.1'
     compile 'io.reactivex.rxjava2:rxjava:2.1.2'
 
     debugCompile 'com.readystatesoftware.chuck:library:1.1.0'
