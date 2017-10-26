@@ -66,9 +66,9 @@ class DataCollectionModel(private val mContext: Context, private val mRestApi: R
         val bandwidthObservable = mSources.bandwidth().subscribeOn(Schedulers.io())
         return bandwidthObservable
                 .doOnNext { currentData = currentData.copy(bandwidth = it)}
-                .flatMap { aIgnore -> connectivityObservable }
+                .flatMap { connectivityObservable }
                 .doOnNext { currentData = currentData.copy(connectivity = it) }
-                .flatMap { aIgnore -> locationObservable }
+                .flatMap { locationObservable }
                 .map { currentData.copy(location = it) }
     }
 

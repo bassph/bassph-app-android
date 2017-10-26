@@ -11,7 +11,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import cn.pedant.SweetAlert.SweetAlertDialog
 import com.crashlytics.android.Crashlytics
-import com.facebook.FacebookSdk.getApplicationContext
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -166,8 +165,8 @@ class MapsActivity : BaseActivity(), OnMapReadyCallback {
 }
 
 private class MarkerRenderer(val context: Context, val map: GoogleMap, clusterManager: ClusterManager<MyClusterItem>) : DefaultClusterRenderer<MyClusterItem>(context, map, clusterManager) {
-    private val mIconGenerator = IconGenerator(getApplicationContext())
-    private val mImageView: ImageView = ImageView(getApplicationContext())
+    private val mIconGenerator = IconGenerator(context)
+    private val mImageView: ImageView = ImageView(context)
     private val mDimension: Int = context.resources.getDimension(R.dimen.marker_image).toInt()
 
     init {

@@ -6,13 +6,13 @@ import android.support.multidex.MultiDex
 import com.crashlytics.android.Crashlytics
 import com.evernote.android.job.JobManager
 import com.facebook.stetho.Stetho
+import io.fabric.sdk.android.Fabric
+import jonathanfinerty.once.Once
 import org.projectbass.bass.inject.ApplicationComponent
 import org.projectbass.bass.inject.ApplicationModule
 import org.projectbass.bass.inject.DaggerApplicationComponent
 import org.projectbass.bass.inject.RestModule
 import org.projectbass.bass.service.BASSJobCreator
-import io.fabric.sdk.android.Fabric
-import jonathanfinerty.once.Once
 import javax.inject.Inject
 
 /**

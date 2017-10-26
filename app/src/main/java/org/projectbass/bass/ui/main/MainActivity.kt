@@ -33,6 +33,7 @@ import com.facebook.share.model.ShareHashtag
 import com.facebook.share.model.ShareLinkContent
 import com.facebook.share.widget.ShareDialog
 import com.github.pwittchen.reactivewifi.AccessRequester
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.hsalf.smilerating.BaseRating
 import com.hsalf.smilerating.SmileRating
 import jonathanfinerty.once.Once
@@ -46,6 +47,7 @@ import org.projectbass.bass.service.job.DataCollectionJob
 import org.projectbass.bass.ui.BaseActivity
 import org.projectbass.bass.ui.history.HistoryActivity
 import org.projectbass.bass.ui.map.MapsActivity
+import org.projectbass.bass.utils.AnalyticsUtils
 import org.projectbass.bass.utils.SharedPrefUtil
 import rx.Observable
 import rx.Single
@@ -66,8 +68,11 @@ class MainActivity : BaseActivity() {
     @BindView(R.id.btnMap) lateinit var map: Button
     @BindView(R.id.enableAutoMeasure) lateinit var enableAutoMeasure: CheckBox
 
-    @Inject lateinit internal var mDataCollectionActionCreator: DataCollectionActionCreator
-    @Inject lateinit internal var mDataCollectionStore: DataCollectionStore
+    @Inject lateinit internal var dataCollectionActionCreator: DataCollectionActionCreator
+    @Inject lateinit internal var dataCollectionStore: DataCollectionStore
+    @Inject lateinit internal var analyticsUtils: AnalyticsUtils
+    @Inject lateinit internal var firebaseAnalytics: FirebaseAnalytics
+
     private var pDialog: SweetAlertDialog? = null
     private var isAlreadyRunningTest: Boolean = false
 
@@ -108,7 +113,9 @@ class MainActivity : BaseActivity() {
 
         isConnected.subscribe({
             SharedPrefUtil.retrieveTempData(this)?.let {
-                postToServer(it)
+                it?.let {
+                    postToServer(it)
+                }
             }
         }, Crashlytics::logException)
     }
@@ -129,82 +136,70 @@ class MainActivity : BaseActivity() {
     }
 
     private fun showMapTutorial() {
-        MaterialIntroView.Builder(this)
-                .enableDotAnimation(false)
-                .enableIcon(false)
-                .setFocusGravity(FocusGravity.CENTER)
-                .setFocusType(Focus.NORMAL)
-                .setTargetPadding(30)
-                .dismissOnTouch(true)
-                .setDelayMillis(0)
-                .enableFadeAnimation(true)
-                .performClick(false)
-                .setInfoText("To view measurement reports, click Map.")
-                .setShape(ShapeType.CIRCLE)
-                .setTarget(map)
-                .setIdempotent(false)
-                .setUsageId(UUID.randomUUID().toString())
-                .setListener {
+        showTutorialOverlay(message = "To view measurement reports, click Map.",
+                target = map,
+                focusType = Focus.ALL,
+                listener = {
                     Once.markDone("tutorial_map")
-                }
-                .show()
+                    firebaseAnalytics.logEvent(FirebaseAnalytics.Event.TUTORIAL_COMPLETE,
+                            Bundle().apply { putBoolean("is_complete", true) })
+                })
     }
 
     private fun showMeasureTutorial() {
+        showTutorialOverlay(message = "Hi There! To contribute to our data and see your network speed, please click the button in the center.",
+                target = centerImage,
+                focusType = Focus.ALL,
+                listener = {
+                    Once.markDone("tutorial_measure")
+                    firebaseAnalytics.logEvent(FirebaseAnalytics.Event.TUTORIAL_BEGIN,
+                            Bundle().apply { putBoolean("is_complete", false) })
+                    showTutorial()
+                })
+    }
+
+    private fun showAutoMeasureTutorial() {
+        showTutorialOverlay(message = "If you want to send us your measurements regularly, please check this box. Let's check this for now to help us gather more data (You can uncheck it).",
+                target = enableAutoMeasure,
+                focusType = Focus.ALL,
+                listener = {
+                    enableAutoMeasure.isChecked = true
+                    Once.markDone("tutorial_auto_measure")
+                    showTutorial()
+                })
+    }
+
+    fun showTutorialOverlay(target: View, message: String, focusType: Focus = Focus.NORMAL, listener: () -> Unit) {
         MaterialIntroView.Builder(this)
                 .enableDotAnimation(false)
                 .enableIcon(false)
                 .setFocusGravity(FocusGravity.CENTER)
-                .setFocusType(Focus.NORMAL)
+                .setFocusType(focusType)
                 .dismissOnTouch(true)
                 .setTargetPadding(30)
                 .setDelayMillis(100)
                 .enableFadeAnimation(true)
                 .performClick(false)
                 .setIdempotent(false)
-                .setInfoText("Hi There! To contribute to our data and see your network speed, please click the button in the center.")
+                .setInfoText(message)
                 .setShape(ShapeType.CIRCLE)
-                .setTarget(centerImage)
+                .setTarget(target)
                 .setUsageId(UUID.randomUUID().toString())
-                .setListener {
-                    Once.markDone("tutorial_measure")
-                    showTutorial()
-                }
-                .show()
-    }
-
-    private fun showAutoMeasureTutorial() {
-        MaterialIntroView.Builder(this)
-                .enableDotAnimation(false)
-                .enableIcon(false)
-                .setFocusGravity(FocusGravity.CENTER)
-                .setFocusType(Focus.ALL)
-                .dismissOnTouch(true)
-                .setTargetPadding(30)
-                .setDelayMillis(0)
-                .enableFadeAnimation(true)
-                .performClick(false)
-                .setIdempotent(false)
-                .setInfoText("If you want to send us your measurements regularly, please check this box. Let's check this for now to help us gather more data (You can uncheck it).")
-                .setShape(ShapeType.CIRCLE)
-                .setTarget(enableAutoMeasure)
-                .setUsageId(UUID.randomUUID().toString())
-                .setListener {
-                    enableAutoMeasure.isChecked = true
-                    Once.markDone("tutorial_auto_measure")
-                    showTutorial()
-                }
+                .setListener { listener() }
                 .show()
     }
 
     private fun initFlux() {
-        addSubscriptionToUnsubscribe(mDataCollectionStore.observable()
+        addSubscriptionToUnsubscribe(dataCollectionStore.observable()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ store ->
                     when (store.action) {
                         DataCollectionActionCreator.ACTION_COLLECT_DATA_S -> {
                             resetView()
-                            getCarrierUserSatisfaction(store.data)
+                            store.data?.let {
+                                getCarrierUserSatisfaction(it)
+                            }
+
                         }
                         DataCollectionActionCreator.ACTION_SEND_DATA_S -> showShareResultDialog()
                         DataCollectionActionCreator.ACTION_SEND_DATA_F -> {
@@ -213,6 +208,7 @@ class MainActivity : BaseActivity() {
                         }
                         DataCollectionActionCreator.ACTION_COLLECT_DATA_F -> {
                             pDialog?.dismiss()
+                            firebaseAnalytics.logEvent("data_collection_failed", Bundle().apply { putBoolean("is_auto", false) })
                             resetView()
                         }
                     }
@@ -220,14 +216,14 @@ class MainActivity : BaseActivity() {
         )
     }
 
-    private fun getCarrierUserSatisfaction(data: Data?) {
+    private fun getCarrierUserSatisfaction(data: Data) {
         SweetAlertDialog(this, SweetAlertDialog.NORMAL_TYPE).apply {
-            titleText = "How do you feel about ${data?.operator}?"
+            titleText = "How do you feel about ${data.operator}?"
             confirmText = "Submit"
             setCancelable(false)
             val smileRatingView = initSmileRatingView()
             setConfirmClickListener { dialog ->
-                data?.mood = smileRatingView.rating - 3
+                data.mood = smileRatingView.rating - 3
                 dismissWithAnimation()
                 postToServer(data)
             }
@@ -245,34 +241,36 @@ class MainActivity : BaseActivity() {
 
     private fun showErrorDialog() {
         AlertDialog.Builder(this)
-                .setTitle("Error : ${mDataCollectionStore.error?.statusCode}")
-                .setMessage(mDataCollectionStore.error?.errorMessage)
+                .setTitle("Error : ${dataCollectionStore.error?.statusCode}")
+                .setMessage(dataCollectionStore.error?.errorMessage)
                 .show()
     }
 
     private fun showShareResultDialog() {
-        val result = mDataCollectionStore.data?.toString(this@MainActivity)
-        pDialog?.setTitleText("Sent! Here's your data")
-                ?.setCancelText("I'm Done")
-                ?.setCancelClickListener({ it.dismissWithAnimation() })
-                ?.setConfirmText("Share Results")
-                ?.setContentText(result)
-                ?.setConfirmClickListener { dialog ->
-                    if (ShareDialog.canShow(ShareLinkContent::class.java)) {
-                        val linkContent = ShareLinkContent.Builder()
-                                .setContentTitle("My BASS Results")
-                                .setImageUrl(Uri.parse("https://scontent.fmnl4-6.fna.fbcdn.net/v/t1.0-9/17796714_184477785394716_1700205285852495439_n.png?oh=40acf149ffe8dcc0e24e60af7f844514&oe=595D6465"))
-                                .setContentDescription(result)
-                                .setContentUrl(Uri.parse("https://bass.bnshosting.net/device"))
-                                .setShareHashtag(ShareHashtag.Builder()
-                                        .setHashtag("#BASSparaSaBayan")
-                                        .build())
-                                .build()
+        val result = dataCollectionStore.data?.toString(this@MainActivity)
+        pDialog?.run {
+            titleText = "Sent! Here's your data"
+            cancelText = "I'm Done"
+            setCancelClickListener({ it.dismissWithAnimation() })
+            confirmText = "Share Results"
+            contentText = result
+            setConfirmClickListener { dialog ->
+                if (ShareDialog.canShow(ShareLinkContent::class.java)) {
+                    val linkContent = ShareLinkContent.Builder()
+                            .setContentTitle("My BASS Results")
+                            .setImageUrl(Uri.parse("https://scontent.fmnl4-6.fna.fbcdn.net/v/t1.0-9/17796714_184477785394716_1700205285852495439_n.png?oh=40acf149ffe8dcc0e24e60af7f844514&oe=595D6465"))
+                            .setContentDescription(result)
+                            .setContentUrl(Uri.parse("https://bass.bnshosting.net/device"))
+                            .setShareHashtag(ShareHashtag.Builder()
+                                    .setHashtag("#BASSparaSaBayan")
+                                    .build())
+                            .build()
 
-                        ShareDialog.show(this@MainActivity, linkContent)
-                    }
+                    ShareDialog.show(this@MainActivity, linkContent)
                 }
-                ?.changeAlertType(SweetAlertDialog.SUCCESS_TYPE)
+            }
+            changeAlertType(SweetAlertDialog.SUCCESS_TYPE)
+        }
         // TODO: Don't treat shared prefs as database
         SharedPrefUtil.clearTempData(this)
         resetView()
@@ -280,7 +278,6 @@ class MainActivity : BaseActivity() {
 
     @OnClick(R.id.btnMap)
     fun onButtonMapsClicked() {
-
         val intent = Intent(this@MainActivity, MapsActivity::class.java)
         startActivity(intent)
     }
@@ -308,26 +305,35 @@ class MainActivity : BaseActivity() {
 
     @OnCheckedChanged(R.id.enableAutoMeasure)
     fun onEnabledMeasure(v: CompoundButton, isChecked: Boolean) {
+        firebaseAnalytics.logEvent("auto_measure", Bundle().apply { putBoolean("is_auto", isChecked) })
         SharedPrefUtil.saveFlag(this, "auto_measure", isChecked)
     }
 
     fun beginTest() {
+        firebaseAnalytics.logEvent("begin_test", Bundle().apply { putBoolean("start", true) })
         val fineLocationPermissionNotGranted = ActivityCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) != PERMISSION_GRANTED
         val coarseLocationPermissionNotGranted = ActivityCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION) != PERMISSION_GRANTED
         val phoneStatePermissionNotGranted = ActivityCompat.checkSelfPermission(this, READ_PHONE_STATE) != PERMISSION_GRANTED
         if (fineLocationPermissionNotGranted && coarseLocationPermissionNotGranted) {
-            requestCoarseLocationPermission()
+            if (fineLocationPermissionNotGranted) {
+                requestCoarseLocationPermission()
+                firebaseAnalytics.logEvent("permission_denied", Bundle().apply { putString("permission", ACCESS_FINE_LOCATION) })
+            }
+            if (coarseLocationPermissionNotGranted) {
+                firebaseAnalytics.logEvent("permission_denied", Bundle().apply { putString("permission", ACCESS_COARSE_LOCATION) })
+            }
             isAlreadyRunningTest = false
             endTest()
+
             return
         }
         if (phoneStatePermissionNotGranted) {
             isAlreadyRunningTest = false
             requestPhoneStatePermission()
             endTest()
+            firebaseAnalytics.logEvent("permission_denied", Bundle().apply { putString("permission", READ_PHONE_STATE) })
             return
         }
-
         if (Build.VERSION.SDK_INT == Build.VERSION_CODES.JELLY_BEAN) {
             val provider = Settings.Secure.getString(contentResolver, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
             if (!provider.contains(LocationManager.GPS_PROVIDER)) {
@@ -344,8 +350,7 @@ class MainActivity : BaseActivity() {
                 return
             }
         }
-
-        mDataCollectionActionCreator!!.collectData()
+        dataCollectionActionCreator.collectData()
         isAlreadyRunningTest = false
         Answers.getInstance().logCustom(CustomEvent("Begin Test"))
         DataCollectionJob.scheduleJob()
@@ -361,13 +366,11 @@ class MainActivity : BaseActivity() {
         centerImage.setImageDrawable(ContextCompat.getDrawable(this@MainActivity, R.drawable.signal))
     }
 
-    fun postToServer(data: Data?) {
-        Answers.getInstance().logCustom(CustomEvent("Data Sent")
-                .putCustomAttribute("Operator", data?.operator)
-                .putCustomAttribute("Bandwidth", data?.bandwidth)
-                .putCustomAttribute("Signal", data?.signal)
-        )
-        data?.let {
+    fun postToServer(data: Data) {
+
+        analyticsUtils.logPostData(data)
+
+        data.let {
             SharedPrefUtil.saveTempData(this, it)
             pDialog = SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE).apply {
                 progressHelper?.barColor = Color.parseColor("#A5DC86")
@@ -375,7 +378,7 @@ class MainActivity : BaseActivity() {
                 setCancelable(false)
                 show()
             }
-            mDataCollectionActionCreator.sendData(it)
+            dataCollectionActionCreator.sendData(it)
         }
     }
 
