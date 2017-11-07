@@ -1,5 +1,6 @@
 package org.projectbass.bass.utils
 
+import android.net.ConnectivityManager
 import android.os.Bundle
 import com.crashlytics.android.answers.Answers
 import com.crashlytics.android.answers.CustomEvent
@@ -18,6 +19,7 @@ class AnalyticsUtils(val firebaseAnalytics: FirebaseAnalytics) {
         Answers.getInstance().logCustom(CustomEvent("Data Sent")
                 .putCustomAttribute("Operator", data.operator)
                 .putCustomAttribute("Bandwidth", data.bandwidth)
+                .putCustomAttribute("ConnectionType", if (data.connectivity?.type == ConnectivityManager.TYPE_WIFI) "wifi" else "mobile data")
                 .putCustomAttribute("Signal", data.signal)
         )
 
@@ -31,10 +33,12 @@ class AnalyticsUtils(val firebaseAnalytics: FirebaseAnalytics) {
             putString("Operator", data.operator)
             putString("Bandwidth", data.bandwidth)
             putString("Signal", data.signal)
+            putString("ConnectionType", if (data.connectivity?.type == ConnectivityManager.TYPE_WIFI) "wifi" else "mobile data")
             putInt("Mood", data.mood ?: 0)
         }
 
         firebaseAnalytics.setUserId(data.imei)
+        firebaseAnalytics.setUserProperty("Operator", data.operator)
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.POST_SCORE, bundle)
     }
 }
