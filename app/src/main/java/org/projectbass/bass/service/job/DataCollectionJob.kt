@@ -1,7 +1,9 @@
 package org.projectbass.bass.service.job
 
+import android.os.Bundle
 import com.evernote.android.job.Job
 import com.evernote.android.job.JobRequest
+import com.google.firebase.analytics.FirebaseAnalytics
 import org.projectbass.bass.flux.action.DataCollectionActionCreator
 import org.projectbass.bass.flux.model.DataCollectionModel
 import org.projectbass.bass.model.Data
@@ -15,7 +17,7 @@ import java.util.concurrent.TimeUnit
  * @createdOn 09/07/2017
  */
 
-class DataCollectionJob(val dataCollectionActionCreator: DataCollectionActionCreator, val dataCollectionModel: DataCollectionModel) : Job() {
+class DataCollectionJob(val firebaseAnalytics: FirebaseAnalytics, val dataCollectionActionCreator: DataCollectionActionCreator, val dataCollectionModel: DataCollectionModel) : Job() {
 
     override fun onRunJob(params: Params): Job.Result {
         if (!SharedPrefUtil.retrieveFlag(context, "auto_measure")) return Job.Result.SUCCESS
@@ -23,12 +25,22 @@ class DataCollectionJob(val dataCollectionActionCreator: DataCollectionActionCre
         try {
             data = dataCollectionModel.executeNetworkTest().toBlocking().toFuture().get()
         } catch (e: InterruptedException) {
+            firebaseAnalytics.logEvent("data_collection_failed", Bundle().apply { putBoolean("is_auto", true) })
             return Job.Result.RESCHEDULE
         } catch (e: ExecutionException) {
+            firebaseAnalytics.logEvent("data_collection_failed", Bundle().apply { putBoolean("is_auto", true) })
             return Job.Result.RESCHEDULE
         }
 
         data?.let {
+            val bundle = Bundle().apply {
+                putString("Operator", it.operator)
+                putString("Bandwidth", it.bandwidth)
+                putString("Signal", it.signal)
+            }
+
+            firebaseAnalytics.setUserId(it.imei)
+            firebaseAnalytics.logEvent("auto_measure", bundle)
             dataCollectionActionCreator.sendData(it)
         }
 

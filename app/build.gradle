@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 apply plugin: 'io.fabric'
 
 repositories {
@@ -11,7 +12,7 @@ repositories {
 
 // Manifest version information!
 def versionMajor = 4
-def versionMinor = 1
+def versionMinor = 2
 def versionPatch = 2
 def versionBuild = 0
 
@@ -52,7 +53,7 @@ android {
 
     buildTypes {
         debug {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt')
             proguardFiles fileTree(dir: 'proguard-rules', include: ['*.pro']).asList().toArray()
         }
@@ -79,7 +80,7 @@ android {
 }
 
 kapt {
-    generateStubs = true
+    correctErrorTypes = true
 }
 
 dependencies {
@@ -93,6 +94,7 @@ dependencies {
     compile "com.android.support:design:$supportLibraryVersion"
     compile 'com.android.support:multidex:1.0.1'
 
+    compile "com.google.firebase:firebase-core:$playServicesVersion"
     compile "com.google.android.gms:play-services-location:$playServicesVersion"
     compile "com.google.android.gms:play-services-places:$playServicesVersion"
     compile "com.google.android.gms:play-services-gcm:$playServicesVersion"
@@ -129,18 +131,19 @@ dependencies {
     compile 'io.reactivex:rxjava:1.1.6'
 
     compile 'com.skyfishjy.ripplebackground:library:1.0.1'
-    compile 'cn.pedant.sweetalert:library:1.3'
+    compile 'com.github.f0ris.sweetalert:library:1.5.2'
+    compile 'com.github.sujithkanna:smileyrating:1.6.8'
 
     compile 'com.facebook.android:facebook-android-sdk:4.23.0'
 
     compile 'com.github.iammert:MaterialIntroView:1.6.0'
     compile 'com.jonathanfinerty.once:once:1.2.2'
 
-    compile 'io.requery:requery:1.4.0'
-    compile 'io.requery:requery-kotlin:1.4.0'
-    compile 'io.requery:requery-android:1.4.0'
-    kapt 'io.requery:requery-processor:1.4.0'
-    provided 'io.requery:requery-processor:1.1.0'
+    compile 'io.requery:requery:1.4.1'
+    compile 'io.requery:requery-kotlin:1.4.1'
+    compile 'io.requery:requery-android:1.4.1'
+    kapt 'io.requery:requery-processor:1.4.1'
+    annotationProcessor 'io.requery:requery-processor:1.4.1'
     compile 'io.reactivex.rxjava2:rxjava:2.1.2'
 
     debugCompile 'com.readystatesoftware.chuck:library:1.1.0'
@@ -150,3 +153,5 @@ dependencies {
 
     compile 'com.google.maps.android:android-maps-utils:0.5+'
 }
+
+apply plugin: 'com.google.gms.google-services'

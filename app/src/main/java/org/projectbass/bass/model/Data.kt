@@ -13,6 +13,7 @@ import org.projectbass.bass.R
 data class Data(val connectivity: Connectivity? = null,
                 val location: Location? = null,
                 val operator: String,
+                var mood: Int? = null,
                 val device: Device,
                 val imei: String,
                 val signal: String,
