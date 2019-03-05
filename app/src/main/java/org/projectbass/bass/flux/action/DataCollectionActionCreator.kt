@@ -25,7 +25,9 @@ class DataCollectionActionCreator(private val mDispatcher: Dispatcher, private v
 
     fun collectData() {
         mModel.executeNetworkTest()
-                .subscribe({ data -> mDispatcher.dispatch(Action.create(ACTION_COLLECT_DATA_S, data)) }) { throwable -> mDispatcher.dispatch(Action.create(ACTION_COLLECT_DATA_F, mUtils.getError(throwable))) }
+                .subscribe(
+                        { data -> mDispatcher.dispatch(Action.create(ACTION_COLLECT_DATA_S, data)) })
+                { throwable -> mDispatcher.dispatch(Action.create(ACTION_COLLECT_DATA_F, mUtils.getError(throwable))) }
     }
 
     fun sendData(data: Data) {

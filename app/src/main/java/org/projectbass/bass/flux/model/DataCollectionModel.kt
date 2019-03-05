@@ -2,6 +2,7 @@ package org.projectbass.bass.flux.model
 
 import android.content.Context
 import android.net.ConnectivityManager
+import android.util.Log
 import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork
 import com.google.android.gms.location.LocationRequest
 import org.projectbass.bass.core.Database
@@ -17,11 +18,11 @@ import rx.schedulers.Schedulers
 class DataCollectionModel(private val mContext: Context, private val mRestApi: RestAPI, private val mSources: Sources, private val database: Database) {
     @Throws(SecurityException::class)
     fun executeNetworkTest(): Observable<Data> {
-        val connectivityObservable = ReactiveNetwork.observeNetworkConnectivity(mContext).first().map {
-            return@map Connectivity(
+        val connectivityObservable = ReactiveNetwork.observeNetworkConnectivity(mContext)
+                .first().map { return@map Connectivity(
                     available = it.isAvailable,
                     detailedState = it.detailedState.name,
-                    extraInfo = it.extraInfo,
+                    extraInfo = it.extraInfo ?: "No info",
                     failover = it.isFailover,
                     roaming = it.isRoaming,
                     state = it.state.name,
@@ -30,7 +31,10 @@ class DataCollectionModel(private val mContext: Context, private val mRestApi: R
                     type = it.type,
                     typeName = it.typeName
             )
+        }.doOnError {
+            Log.e("connectivityObservable", it.message, it)
         }
+
         val request = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setNumUpdates(1)
@@ -70,6 +74,11 @@ class DataCollectionModel(private val mContext: Context, private val mRestApi: R
                 .doOnNext { currentData = currentData.copy(connectivity = it) }
                 .flatMap { locationObservable }
                 .map { currentData.copy(location = it) }
+                .doOnError {
+                    Log.e("bandwidthObservable", it.message, it)
+                }
+
+
     }
 
     fun sendData(data: Data): Observable<RecordResponse> {

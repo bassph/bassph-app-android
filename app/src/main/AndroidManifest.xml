@@ -32,7 +32,7 @@
 
         <provider
             android:name="com.facebook.FacebookContentProvider"
-            android:authorities="com.facebook.app.FacebookContentProviderFB_API_KEY_HERE"
+            android:authorities="com.facebook.app.FacebookContentProvider1283019038413994"
             android:exported="true"/>
 
         <activity

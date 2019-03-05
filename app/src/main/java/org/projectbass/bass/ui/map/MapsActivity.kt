@@ -134,7 +134,7 @@ class MapsActivity : BaseActivity(), OnMapReadyCallback {
     private fun requestCoarseLocationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
-                    MainActivity.PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION)
+                    MainActivity.PERMISSIONS_REQUEST_CODE_ACCESS_FINE_LOCATION)
         }
     }
 
@@ -155,7 +155,7 @@ class MapsActivity : BaseActivity(), OnMapReadyCallback {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
-            MainActivity.PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION -> {
+            MainActivity.PERMISSIONS_REQUEST_CODE_ACCESS_FINE_LOCATION -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     showPresentLocation()
                 }

@@ -78,8 +78,8 @@ class MainActivity : BaseActivity() {
 
     private fun requestCoarseLocationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            requestPermissions(arrayOf(ACCESS_COARSE_LOCATION),
-                    PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION)
+            requestPermissions(arrayOf(ACCESS_FINE_LOCATION),
+                    PERMISSIONS_REQUEST_CODE_ACCESS_FINE_LOCATION)
         }
     }
 
@@ -92,7 +92,7 @@ class MainActivity : BaseActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
-            PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION,
+            PERMISSIONS_REQUEST_CODE_ACCESS_FINE_LOCATION,
             PERMISSIONS_REQUEST_READ_PHONE_STATE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     onCenterImageClicked()
@@ -218,7 +218,7 @@ class MainActivity : BaseActivity() {
 
     private fun getCarrierUserSatisfaction(data: Data) {
         SweetAlertDialog(this, SweetAlertDialog.NORMAL_TYPE).apply {
-            titleText = "How do you feel about ${data.operator}?"
+            titleText = "How do you feel about your ISP/Network Provider?"
             confirmText = "Submit"
             setCancelable(false)
             val smileRatingView = initSmileRatingView()
@@ -255,19 +255,17 @@ class MainActivity : BaseActivity() {
             confirmText = "Share Results"
             contentText = result
             setConfirmClickListener { dialog ->
-                if (ShareDialog.canShow(ShareLinkContent::class.java)) {
-                    val linkContent = ShareLinkContent.Builder()
-                            .setContentTitle("My BASS Results")
-                            .setImageUrl(Uri.parse("https://scontent.fmnl4-6.fna.fbcdn.net/v/t1.0-9/17796714_184477785394716_1700205285852495439_n.png?oh=40acf149ffe8dcc0e24e60af7f844514&oe=595D6465"))
-                            .setContentDescription(result)
-                            .setContentUrl(Uri.parse("https://bass.bnshosting.net/device"))
-                            .setShareHashtag(ShareHashtag.Builder()
-                                    .setHashtag("#BASSparaSaBayan")
-                                    .build())
-                            .build()
+                val linkContent = ShareLinkContent.Builder()
+                        .setContentTitle("My BASS Results")
+                        .setImageUrl(Uri.parse("https://scontent.fmnl4-6.fna.fbcdn.net/v/t1.0-9/17796714_184477785394716_1700205285852495439_n.png?oh=40acf149ffe8dcc0e24e60af7f844514&oe=595D6465"))
+                        .setContentDescription(result)
+                        .setContentUrl(Uri.parse("https://bass.bnshosting.net/device"))
+                        .setShareHashtag(ShareHashtag.Builder()
+                                .setHashtag("#BASSparaSaBayan")
+                                .build())
+                        .build()
 
-                    ShareDialog.show(this@MainActivity, linkContent)
-                }
+                ShareDialog.show(this@MainActivity, linkContent)
             }
             changeAlertType(SweetAlertDialog.SUCCESS_TYPE)
         }
@@ -312,15 +310,11 @@ class MainActivity : BaseActivity() {
     fun beginTest() {
         firebaseAnalytics.logEvent("begin_test", Bundle().apply { putBoolean("start", true) })
         val fineLocationPermissionNotGranted = ActivityCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) != PERMISSION_GRANTED
-        val coarseLocationPermissionNotGranted = ActivityCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION) != PERMISSION_GRANTED
         val phoneStatePermissionNotGranted = ActivityCompat.checkSelfPermission(this, READ_PHONE_STATE) != PERMISSION_GRANTED
-        if (fineLocationPermissionNotGranted && coarseLocationPermissionNotGranted) {
+        if (fineLocationPermissionNotGranted) {
             if (fineLocationPermissionNotGranted) {
                 requestCoarseLocationPermission()
                 firebaseAnalytics.logEvent("permission_denied", Bundle().apply { putString("permission", ACCESS_FINE_LOCATION) })
-            }
-            if (coarseLocationPermissionNotGranted) {
-                firebaseAnalytics.logEvent("permission_denied", Bundle().apply { putString("permission", ACCESS_COARSE_LOCATION) })
             }
             isAlreadyRunningTest = false
             endTest()
@@ -398,7 +392,7 @@ class MainActivity : BaseActivity() {
     }
 
     companion object {
-        val PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 1000
+        val PERMISSIONS_REQUEST_CODE_ACCESS_FINE_LOCATION = 1000
         private val PERMISSIONS_REQUEST_READ_PHONE_STATE = 1001
     }
 }

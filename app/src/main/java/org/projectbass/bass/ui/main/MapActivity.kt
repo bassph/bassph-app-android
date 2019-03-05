@@ -8,7 +8,6 @@ import android.webkit.GeolocationPermissions
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 
-import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 
@@ -17,7 +16,7 @@ import org.projectbass.bass.ui.BaseActivity
 
 class MapActivity : BaseActivity() {
 
-    private val PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 1000
+    private val PERMISSIONS_REQUEST_CODE_ACCESS_FINE_LOCATION = 1000
     private val MAP_URL = "https://bass.bnshosting.net/public"
 
     override val layoutRes: Int = R.layout.activity_map
@@ -26,10 +25,9 @@ class MapActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
         val fineLocationPermissionNotGranted = ActivityCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) != PERMISSION_GRANTED
-        val coarseLocationPermissionNotGranted = ActivityCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION) != PERMISSION_GRANTED
 
-        if (fineLocationPermissionNotGranted && coarseLocationPermissionNotGranted) {
-            requestCoarseLocationPermission()
+        if (fineLocationPermissionNotGranted) {
+            requestFineLocationPermission()
             return
         }
         loadMap()
@@ -50,7 +48,7 @@ class MapActivity : BaseActivity() {
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        if (requestCode == PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION) {
+        if (requestCode == PERMISSIONS_REQUEST_CODE_ACCESS_FINE_LOCATION) {
             if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 loadMap()
             }
@@ -58,11 +56,10 @@ class MapActivity : BaseActivity() {
         }
     }
 
-
-    private fun requestCoarseLocationPermission() {
+    private fun requestFineLocationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            requestPermissions(arrayOf<String>(ACCESS_COARSE_LOCATION),
-                    PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION)
+            requestPermissions(arrayOf<String>(ACCESS_FINE_LOCATION),
+                    PERMISSIONS_REQUEST_CODE_ACCESS_FINE_LOCATION)
         }
     }
 }
