@@ -21,7 +21,7 @@ class DataCollectionModel(private val mContext: Context, private val mRestApi: R
             return@map Connectivity(
                     available = it.isAvailable,
                     detailedState = it.detailedState.name,
-                    extraInfo = it.extraInfo,
+                    extraInfo = it.extraInfo ?: "",
                     failover = it.isFailover,
                     roaming = it.isRoaming,
                     state = it.state.name,
@@ -32,7 +32,7 @@ class DataCollectionModel(private val mContext: Context, private val mRestApi: R
             )
         }
         val request = LocationRequest.create()
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
                 .setNumUpdates(1)
                 .setInterval(100)
         val locationProvider = ReactiveLocationProvider(mContext)

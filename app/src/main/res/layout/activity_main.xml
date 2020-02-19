@@ -79,6 +79,11 @@
             android:textColor="#0099CC"
             android:text="My Results" />
 
+        <include
+            android:id="@+id/share_results"
+            android:visibility="gone"
+            layout="@layout/share_results"/>
+
     </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>

@@ -140,7 +140,7 @@ class MapsActivity : BaseActivity(), OnMapReadyCallback {
 
     fun showPresentLocation() {
         val request = LocationRequest.create()
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
                 .setNumUpdates(1)
                 .setInterval(100)
         val locationProvider = ReactiveLocationProvider(this)

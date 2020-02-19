@@ -14,9 +14,7 @@ import rx.Observable
 import java.io.BufferedInputStream
 import java.io.IOException
 import java.net.URL
-
-
-
+import java.util.*
 
 
 /**
@@ -34,7 +32,7 @@ class Sources(private val context: Context) {
     }
 
     fun imei(): String {
-        return (context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager).deviceId
+        return UUID.randomUUID().toString()
     }
 
     fun version(): String {

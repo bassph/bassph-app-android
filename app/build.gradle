@@ -12,7 +12,7 @@ repositories {
 
 // Manifest version information!
 def versionMajor = 4
-def versionMinor = 2
+def versionMinor = 4
 def versionPatch = 2
 def versionBuild = 0
 
@@ -22,13 +22,13 @@ android {
         projectbass {
             keyAlias 'projectbass'
             keyPassword 'projectbass1234!!'
-            storeFile file('/Users/aar/StudioProjects/projectbass.jks')
+            storeFile file('/Users/aar/AndroidStudioProjects/projectbass.jks')
             storePassword 'projectbass1234!!'
         }
     }
 
     buildToolsVersion '25.0.3'
-    compileSdkVersion 25
+    compileSdkVersion 28
 
     applicationVariants.all { variant ->
         //File Names
@@ -44,7 +44,7 @@ android {
     defaultConfig {
         applicationId 'org.projectbass.bass'
         minSdkVersion 17
-        targetSdkVersion 25
+        targetSdkVersion 29
         versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
         versionName "${versionMajor}.${versionMinor}.${versionPatch}.${versionBuild}"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -58,6 +58,7 @@ android {
             proguardFiles fileTree(dir: 'proguard-rules', include: ['*.pro']).asList().toArray()
         }
         release {
+            signingConfig signingConfigs.projectbass
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt')
             proguardFiles fileTree(dir: 'proguard-rules', include: ['*.pro']).asList().toArray()
@@ -152,6 +153,8 @@ dependencies {
     compile 'com.facebook.stetho:stetho-okhttp3:1.5.0'
 
     compile 'com.google.maps.android:android-maps-utils:0.5+'
+
+    compile 'com.cardiomood.android:android-widgets:0.1.1'
 }
 
 apply plugin: 'com.google.gms.google-services'
