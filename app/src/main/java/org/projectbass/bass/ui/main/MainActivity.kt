@@ -5,19 +5,19 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.location.LocationManager
+import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.text.TextUtils
 import android.view.View
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.CompoundButton
-import android.widget.ImageView
+import android.widget.*
 import butterknife.BindView
 import butterknife.OnCheckedChanged
 import butterknife.OnClick
@@ -26,11 +26,14 @@ import co.mobiwise.materialintro.shape.Focus
 import co.mobiwise.materialintro.shape.FocusGravity
 import co.mobiwise.materialintro.shape.ShapeType
 import co.mobiwise.materialintro.view.MaterialIntroView
+import com.cardiomood.android.controls.gauge.SpeedometerGauge
 import com.crashlytics.android.Crashlytics
 import com.crashlytics.android.answers.Answers
 import com.crashlytics.android.answers.CustomEvent
 import com.facebook.share.model.ShareHashtag
 import com.facebook.share.model.ShareLinkContent
+import com.facebook.share.model.SharePhoto
+import com.facebook.share.model.SharePhotoContent
 import com.facebook.share.widget.ShareDialog
 import com.github.pwittchen.reactivewifi.AccessRequester
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -38,6 +41,7 @@ import com.hsalf.smilerating.BaseRating
 import com.hsalf.smilerating.SmileRating
 import jonathanfinerty.once.Once
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.share_results.*
 import org.projectbass.bass.R
 import org.projectbass.bass.flux.action.DataCollectionActionCreator
 import org.projectbass.bass.flux.store.DataCollectionStore
@@ -109,6 +113,8 @@ class MainActivity : BaseActivity() {
 
         showTutorial()
 
+        setupGauge()
+
         initFlux()
 
         isConnected.subscribe({
@@ -118,6 +124,27 @@ class MainActivity : BaseActivity() {
                 }
             }
         }, Crashlytics::logException)
+    }
+
+    private fun setupGauge() {
+
+        // Add label converter
+        speedometer.labelConverter = SpeedometerGauge.LabelConverter { progress, maxProgress ->
+            return@LabelConverter Math.round(progress).toInt().toString()
+        }
+
+        speedometer.labelTextSize = 40
+
+        // configure value range and ticks
+        speedometer.maxSpeed = 30.0
+        speedometer.majorTickStep = 5.0
+        speedometer.minorTicks = 0
+
+        speedometer.addColoredRange(0.0, 5.0, Color.RED)
+        speedometer.addColoredRange(5.0, 10.0, Color.parseColor("#ffa500"))
+        speedometer.addColoredRange(10.0, 15.0, Color.YELLOW)
+        speedometer.addColoredRange(15.0, 20.0, Color.parseColor("#90ee90"))
+        speedometer.setSpeed(0.0, false)
     }
 
     private fun initUi() {
@@ -192,7 +219,7 @@ class MainActivity : BaseActivity() {
     private fun initFlux() {
         addSubscriptionToUnsubscribe(dataCollectionStore.observable()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ store ->
+                .subscribe { store ->
                     when (store.action) {
                         DataCollectionActionCreator.ACTION_COLLECT_DATA_S -> {
                             resetView()
@@ -212,13 +239,13 @@ class MainActivity : BaseActivity() {
                             resetView()
                         }
                     }
-                }) { resetView() }
+                }
         )
     }
 
     private fun getCarrierUserSatisfaction(data: Data) {
         SweetAlertDialog(this, SweetAlertDialog.NORMAL_TYPE).apply {
-            titleText = "How do you feel about ${data.operator}?"
+            titleText = "How do you feel about your connection?"
             confirmText = "Submit"
             setCancelable(false)
             val smileRatingView = initSmileRatingView()
@@ -247,33 +274,76 @@ class MainActivity : BaseActivity() {
     }
 
     private fun showShareResultDialog() {
-        val result = dataCollectionStore.data?.toString(this@MainActivity)
-        pDialog?.run {
-            titleText = "Sent! Here's your data"
-            cancelText = "I'm Done"
-            setCancelClickListener({ it.dismissWithAnimation() })
-            confirmText = "Share Results"
-            contentText = result
-            setConfirmClickListener { dialog ->
-                if (ShareDialog.canShow(ShareLinkContent::class.java)) {
-                    val linkContent = ShareLinkContent.Builder()
-                            .setContentTitle("My BASS Results")
-                            .setImageUrl(Uri.parse("https://scontent.fmnl4-6.fna.fbcdn.net/v/t1.0-9/17796714_184477785394716_1700205285852495439_n.png?oh=40acf149ffe8dcc0e24e60af7f844514&oe=595D6465"))
-                            .setContentDescription(result)
-                            .setContentUrl(Uri.parse("https://bass.bnshosting.net/device"))
-                            .setShareHashtag(ShareHashtag.Builder()
-                                    .setHashtag("#BASSparaSaBayan")
-                                    .build())
-                            .build()
+        pDialog?.dismissWithAnimation()
+        share_results.visibility = View.VISIBLE
 
-                    ShareDialog.show(this@MainActivity, linkContent)
-                }
+        val data = dataCollectionStore.data!!
+
+        if (data.connectivity != null) {
+            if (data.connectivity.type == ConnectivityManager.TYPE_WIFI) {
+                speed.text = "WiFi Speed: "
+            } else {
+                speed.text = "Data Speed: "
             }
-            changeAlertType(SweetAlertDialog.SUCCESS_TYPE)
         }
-        // TODO: Don't treat shared prefs as database
-        SharedPrefUtil.clearTempData(this)
-        resetView()
+
+        if (!TextUtils.isEmpty(data.bandwidth)) {
+            val bandwidth = data.bandwidth.replace(" Kbps", "").toFloat()
+            val bandwidthString: String
+            if (bandwidth < 1024) {
+                bandwidthString = "$bandwidth Kbps"
+
+                speedometer.maxSpeed = 30.0
+                speedometer.majorTickStep = 5.0
+                speedometer.minorTicks = 0
+
+                speedometer.addColoredRange(20.0, speedometer.maxSpeed, Color.GREEN)
+
+                speedometer.setSpeed(1.0, false)
+            } else {
+                bandwidthString = "${(Math.round(bandwidth / 1024))} Mbps"
+
+                if (Math.round(bandwidth / 1024) > 30) {
+                    speedometer.maxSpeed = Math.round(bandwidth / 1024).toDouble()
+                    speedometer.majorTickStep = 10.0
+                    speedometer.minorTicks = 0
+                }
+
+                speedometer.addColoredRange(20.0, speedometer.maxSpeed, Color.GREEN)
+
+                speedometer.setSpeed((bandwidth / 1024).toDouble(), false)
+
+            }
+
+            speed.text = "${speed.text} $bandwidthString"
+        }
+
+        signal.text = "Signal: " + data.signal
+
+
+        done.setOnClickListener {
+            // TODO: Don't treat shared prefs as database
+            SharedPrefUtil.clearTempData(this)
+            resetView()
+        }
+
+
+        share.setOnClickListener {
+            if (ShareDialog.canShow(SharePhotoContent::class.java)) {
+                share_card.isDrawingCacheEnabled = true
+                val bitmap = Bitmap.createBitmap(share_card.drawingCache)
+                share_card.isDrawingCacheEnabled = false
+
+                val linkContent = SharePhotoContent.Builder()
+                        .setPhotos(listOf(SharePhoto.Builder().setBitmap(bitmap).setCaption("My BASS Results").build()))
+                        .build()
+
+                ShareDialog.show(this@MainActivity, linkContent)
+            }
+
+            SharedPrefUtil.clearTempData(this)
+            resetView()
+        }
     }
 
     @OnClick(R.id.btnMap)
@@ -362,6 +432,7 @@ class MainActivity : BaseActivity() {
 
     fun resetView() {
         reportText.visibility = View.VISIBLE
+        share_results.visibility = View.GONE
         rippleBackground.stopRippleAnimation()
         centerImage.setImageDrawable(ContextCompat.getDrawable(this@MainActivity, R.drawable.signal))
     }
