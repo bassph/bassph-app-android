@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">192.168.80.99</domain>
-        <domain includeSubdomains="true">dev.publish.owtoph.com</domain>
         <domain includeSubdomains="true">speedtest.pregi.net</domain>
-        <domain includeSubdomains="true">api-346382725.ap-southeast-1.elb.amazonaws.com</domain>
-        <domain includeSubdomains="true">alb-1956770193.ap-southeast-1.elb.amazonaws.com</domain>
     </domain-config>
 </network-security-config>
