@@ -3,10 +3,7 @@ package org.projectbass.bass.model
 import android.content.Context
 import android.net.TrafficStats
 import android.os.Build
-import android.telephony.CellInfoGsm
-import android.telephony.CellInfoLte
-import android.telephony.CellInfoWcdma
-import android.telephony.TelephonyManager
+import android.telephony.*
 import android.telephony.gsm.GsmCellLocation
 import android.text.TextUtils
 import org.projectbass.bass.BuildConfig
@@ -24,7 +21,13 @@ import java.util.*
 class Sources(private val context: Context) {
 
     fun networkOperator(): String {
-        return (context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager).networkOperatorName
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            SubscriptionManager.getDefaultDataSubscriptionId().let {
+                (context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager).getActiveSubscriptionInfo(it).carrierName.toString()
+            }
+        } else {
+            (context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager).networkOperatorName
+        }
     }
 
     fun device(): Device {
