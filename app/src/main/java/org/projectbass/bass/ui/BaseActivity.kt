@@ -1,7 +1,7 @@
 package org.projectbass.bass.ui
 
 import android.os.Bundle
-import android.support.annotation.LayoutRes
+import androidx.annotation.LayoutRes
 import butterknife.ButterKnife
 import org.projectbass.bass.BASS
 import org.projectbass.bass.flux.FluxActivity

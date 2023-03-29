@@ -3,7 +3,7 @@ package org.projectbass.bass.ui.main
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
+import androidx.core.app.ActivityCompat
 import android.webkit.GeolocationPermissions
 import android.webkit.WebChromeClient
 import android.webkit.WebView

@@ -2,17 +2,14 @@ package org.projectbass.bass
 
 import android.app.Application
 import android.content.Context
-import android.support.multidex.MultiDex
-import com.crashlytics.android.Crashlytics
+import androidx.multidex.MultiDex
 import com.evernote.android.job.JobManager
 import com.facebook.stetho.Stetho
-import io.fabric.sdk.android.Fabric
 import jonathanfinerty.once.Once
 import org.projectbass.bass.inject.ApplicationComponent
 import org.projectbass.bass.inject.ApplicationModule
 import org.projectbass.bass.inject.DaggerApplicationComponent
 import org.projectbass.bass.inject.RestModule
-import org.projectbass.bass.service.BASSJobCreator
 import javax.inject.Inject
 
 /**
@@ -23,7 +20,6 @@ import javax.inject.Inject
 class BASS : Application() {
 
     lateinit var applicationComponent: ApplicationComponent
-    @Inject lateinit var bassJobCreator: BASSJobCreator
 
     override fun onCreate() {
         super.onCreate()
@@ -31,7 +27,6 @@ class BASS : Application() {
     }
 
     private fun init() {
-        Fabric.with(this, Crashlytics())
         Once.initialise(this)
         Stetho.initializeWithDefaults(this)
 
@@ -41,7 +36,6 @@ class BASS : Application() {
                 .restModule(RestModule())
                 .build()
         applicationComponent.inject(this)
-        JobManager.create(this).addJobCreator(bassJobCreator)
     }
 
     public override fun attachBaseContext(base: Context) {

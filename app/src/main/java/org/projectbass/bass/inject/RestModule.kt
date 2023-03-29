@@ -29,7 +29,6 @@ class RestModule {
     @PerApplication
     fun provideOkHttpClient(context: Context): OkHttpClient {
         return OkHttpClient.Builder()
-                .addInterceptor(ChuckInterceptor(context))
                 .addInterceptor(StethoInterceptor())
                 .build()
     }

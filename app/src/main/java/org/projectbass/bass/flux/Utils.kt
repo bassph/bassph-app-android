@@ -1,6 +1,7 @@
 package org.projectbass.bass.flux
 
-import com.crashlytics.android.Crashlytics
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import retrofit2.adapter.rxjava.HttpException
 
 /**
@@ -9,7 +10,7 @@ import retrofit2.adapter.rxjava.HttpException
 class Utils {
 
     fun getError(throwable: Throwable): AppError {
-        Crashlytics.logException(throwable)
+        Firebase.crashlytics.recordException(throwable)
         if (throwable !is HttpException) {
             return AppError.createNetwork(MSG_ERROR_DEFAULT)
         }

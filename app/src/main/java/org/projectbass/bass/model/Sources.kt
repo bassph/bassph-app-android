@@ -92,7 +92,7 @@ class Sources(private val context: Context) {
         return Observable.create<String> { sub ->
             var rateValue = ""
             try {
-                val oneGBFile = "http://speedtest.pregi.net/ubuntu-17.04-server-amd64.iso"
+                val oneGBFile = "http://speed.projectbass.org/ubuntu-17.04-server-amd64.iso"
                 val url = URL(oneGBFile)
 
                 val `is` = url.openStream()

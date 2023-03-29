@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">speedtest.pregi.net</domain>
+        <domain includeSubdomains="true">speed.projectbass.org</domain>
     </domain-config>
 </network-security-config>

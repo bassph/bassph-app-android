@@ -1,6 +1,6 @@
 package org.projectbass.bass.flux.action
 
-import android.support.annotation.StringDef
+import androidx.annotation.StringDef
 import org.projectbass.bass.flux.Action
 import org.projectbass.bass.flux.Dispatcher
 import org.projectbass.bass.flux.Utils

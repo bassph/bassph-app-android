@@ -1,19 +1,23 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
-apply plugin: 'io.fabric'
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-android-extensions'
+    id 'kotlin-kapt'
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
+}
 
 repositories {
+    google()
+    jcenter()
     maven { url 'https://jitpack.io' }
-    maven { url 'https://maven.fabric.io/public' }
     mavenCentral()
 }
 
 // Manifest version information!
 def versionMajor = 4
-def versionMinor = 4
-def versionPatch = 2
+def versionMinor = 6
+def versionPatch = 0
 def versionBuild = 0
 
 android {
@@ -22,32 +26,21 @@ android {
         projectbass {
             keyAlias 'projectbass'
             keyPassword 'projectbass1234!!'
-            storeFile file('/Users/aar/AndroidStudioProjects/projectbass.jks')
+            storeFile file('/Volumes/ADATA HD330/work/teamcatalyst/projectBASS/projectbass.jks')
             storePassword 'projectbass1234!!'
         }
     }
 
     buildToolsVersion '25.0.3'
-    compileSdkVersion 28
-
-    applicationVariants.all { variant ->
-        //File Names
-        variant.outputs.each { output ->
-            if (output.outputFile != null && output.outputFile.name.endsWith('.apk')) {
-                def file = output.outputFile
-                def fileName = "${output.outputFile.name.replace(".apk", "")}-${versionMajor}_${versionMinor}_${versionPatch}_${versionBuild}.apk"
-                output.outputFile = new File(file.parent, fileName)
-            }
-        }
-    }
+    compileSdkVersion 33
 
     defaultConfig {
         applicationId 'org.projectbass.bass'
-        minSdkVersion 17
-        targetSdkVersion 29
+        minSdkVersion 21
+        targetSdkVersion 33
         versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
         versionName "${versionMajor}.${versionMinor}.${versionPatch}.${versionBuild}"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         multiDexEnabled true
     }
 
@@ -87,74 +80,92 @@ kapt {
 dependencies {
 
     def supportLibraryVersion = "25.3.1"
-    def playServicesVersion = "11.0.0"
+    def playServicesVersion = "21.0.1"
     def retrofitVersion = "2.1.0"
 
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile "com.android.support:appcompat-v7:$supportLibraryVersion"
-    compile "com.android.support:design:$supportLibraryVersion"
-    compile 'com.android.support:multidex:1.0.1'
+    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'androidx.multidex:multidex:2.0.0'
 
-    compile "com.google.firebase:firebase-core:$playServicesVersion"
-    compile "com.google.android.gms:play-services-location:$playServicesVersion"
-    compile "com.google.android.gms:play-services-places:$playServicesVersion"
-    compile "com.google.android.gms:play-services-gcm:$playServicesVersion"
+    implementation "com.google.android.gms:play-services-location:$playServicesVersion"
+    implementation 'com.google.android.libraries.places:places:3.0.0'
+    implementation "com.google.android.gms:play-services-gcm:17.0.0"
 
-    compile 'com.google.dagger:dagger:2.7'
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation 'com.google.dagger:dagger:2.7'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     kapt 'com.google.dagger:dagger-compiler:2.7'
-    kapt 'com.jakewharton:butterknife-compiler:8.4.0'
-    provided 'javax.annotation:jsr250-api:1.0'
 
-    compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
-    compile "com.squareup.retrofit2:adapter-rxjava:$retrofitVersion"
-    compile "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    kapt 'com.jakewharton:butterknife-compiler:10.2.3'
+    api 'javax.annotation:jsr250-api:1.0'
 
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    implementation "com.squareup.retrofit2:adapter-rxjava:$retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
 
-    compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
-        transitive = true;
-    }
+    implementation 'com.evernote:android-job:1.4.2'
 
-    compile 'com.evernote:android-job:1.1.11'
+    implementation 'com.jakewharton.rxbinding:rxbinding:1.0.0'
+    implementation 'com.jakewharton.rxbinding:rxbinding-support-v4:1.0.0'
+    implementation 'com.jakewharton.rxbinding:rxbinding-appcompat-v7:1.0.0'
 
-    compile 'com.jakewharton.rxbinding:rxbinding:1.0.0'
-    compile 'com.jakewharton.rxbinding:rxbinding-support-v4:1.0.0'
-    compile 'com.jakewharton.rxbinding:rxbinding-appcompat-v7:1.0.0'
+    implementation 'pl.charmas.android:android-reactive-location:0.10@aar'
+    implementation 'com.github.pwittchen:reactivenetwork:0.8.0'
+    implementation 'com.github.pwittchen:reactivewifi:0.2.0'
 
-    compile 'pl.charmas.android:android-reactive-location:0.10@aar'
-    compile 'com.github.pwittchen:reactivenetwork:0.8.0'
-    compile 'com.github.pwittchen:reactivewifi:0.2.0'
+    implementation 'com.jakewharton.timber:timber:4.3.1'
+    implementation 'com.jakewharton:butterknife:10.2.3'
+    implementation 'io.reactivex:rxandroid:1.2.1'
+    implementation 'io.reactivex:rxjava:1.1.6'
 
-    compile 'com.jakewharton.timber:timber:4.3.1'
-    compile 'com.jakewharton:butterknife:8.4.0'
-    compile 'io.reactivex:rxandroid:1.2.1'
-    compile 'io.reactivex:rxjava:1.1.6'
+    implementation 'com.skyfishjy.ripplebackground:library:1.0.1'
+    implementation 'com.github.f0ris.sweetalert:library:1.5.2'
+    implementation 'com.github.sujithkanna:smileyrating:master-SNAPSHOT'
 
-    compile 'com.skyfishjy.ripplebackground:library:1.0.1'
-    compile 'com.github.f0ris.sweetalert:library:1.5.2'
-    compile 'com.github.sujithkanna:smileyrating:1.6.8'
+    implementation 'com.facebook.android:facebook-android-sdk:4.23.0'
 
-    compile 'com.facebook.android:facebook-android-sdk:4.23.0'
+    implementation 'com.github.iammert:MaterialIntroView:1.6.0'
+    implementation 'com.jonathanfinerty.once:once:1.3.1'
 
-    compile 'com.github.iammert:MaterialIntroView:1.6.0'
-    compile 'com.jonathanfinerty.once:once:1.2.2'
+    implementation 'io.requery:requery:1.6.1'
+    implementation 'io.requery:requery-kotlin:1.6.1'
+    implementation 'io.requery:requery-android:1.6.1' // for android
 
-    compile 'io.requery:requery:1.4.1'
-    compile 'io.requery:requery-kotlin:1.4.1'
-    compile 'io.requery:requery-android:1.4.1'
-    kapt 'io.requery:requery-processor:1.4.1'
+    kapt 'io.requery:requery-processor:1.6.1'
     annotationProcessor 'io.requery:requery-processor:1.4.1'
-    compile 'io.reactivex.rxjava2:rxjava:2.1.2'
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.2'
 
-    debugCompile 'com.readystatesoftware.chuck:library:1.1.0'
-    releaseCompile 'com.readystatesoftware.chuck:library-no-op:1.1.0'
-    compile 'com.facebook.stetho:stetho:1.5.0'
-    compile 'com.facebook.stetho:stetho-okhttp3:1.5.0'
+    debugImplementation 'com.readystatesoftware.chuck:library:1.1.0'
+    releaseImplementation 'com.readystatesoftware.chuck:library-no-op:1.1.0'
+    implementation 'com.facebook.stetho:stetho:1.5.0'
+    implementation 'com.facebook.stetho:stetho-okhttp3:1.5.0'
 
-    compile 'com.google.maps.android:android-maps-utils:0.5+'
+    implementation 'com.google.maps.android:android-maps-utils:0.5+'
 
-    compile 'com.cardiomood.android:android-widgets:0.1.1'
+    implementation 'com.cardiomood.android:android-widgets:0.1.1'
+
+
+    // Import the BoM for the Firebase platform
+    implementation platform('com.google.firebase:firebase-bom:31.2.3')
+
+    // Add the dependencies for the Crashlytics and Analytics libraries
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+
+    def work_version = "2.8.1"
+
+    // Kotlin + coroutines
+    implementation "androidx.work:work-runtime-ktx:$work_version"
+
+    // optional - RxJava2 support
+    implementation "androidx.work:work-rxjava2:$work_version"
+
+    // optional - GCMNetworkManager support
+    implementation "androidx.work:work-gcm:$work_version"
+
+    // optional - Test helpers
+    androidTestImplementation "androidx.work:work-testing:$work_version"
+
+    // optional - Multiprocess support
+    implementation "androidx.work:work-multiprocess:$work_version"
 }
-
-apply plugin: 'com.google.gms.google-services'

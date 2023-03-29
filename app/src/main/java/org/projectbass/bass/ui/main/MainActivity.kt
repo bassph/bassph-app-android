@@ -9,12 +9,11 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.location.LocationManager
 import android.net.ConnectivityManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import android.text.TextUtils
 import android.view.View
 import android.widget.*
@@ -27,16 +26,13 @@ import co.mobiwise.materialintro.shape.FocusGravity
 import co.mobiwise.materialintro.shape.ShapeType
 import co.mobiwise.materialintro.view.MaterialIntroView
 import com.cardiomood.android.controls.gauge.SpeedometerGauge
-import com.crashlytics.android.Crashlytics
-import com.crashlytics.android.answers.Answers
-import com.crashlytics.android.answers.CustomEvent
-import com.facebook.share.model.ShareHashtag
-import com.facebook.share.model.ShareLinkContent
 import com.facebook.share.model.SharePhoto
 import com.facebook.share.model.SharePhotoContent
 import com.facebook.share.widget.ShareDialog
 import com.github.pwittchen.reactivewifi.AccessRequester
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import com.hsalf.smilerating.BaseRating
 import com.hsalf.smilerating.SmileRating
 import jonathanfinerty.once.Once
@@ -80,10 +76,10 @@ class MainActivity : BaseActivity() {
     private var pDialog: SweetAlertDialog? = null
     private var isAlreadyRunningTest: Boolean = false
 
-    private fun requestCoarseLocationPermission() {
+    private fun requestFineLocationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            requestPermissions(arrayOf(ACCESS_COARSE_LOCATION),
-                    PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION)
+            requestPermissions(arrayOf(ACCESS_FINE_LOCATION),
+                    PERMISSIONS_REQUEST_CODE_ACCESS_FINE_LOCATION)
         }
     }
 
@@ -96,7 +92,7 @@ class MainActivity : BaseActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
-            PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION,
+            PERMISSIONS_REQUEST_CODE_ACCESS_FINE_LOCATION,
             PERMISSIONS_REQUEST_READ_PHONE_STATE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     onCenterImageClicked()
@@ -123,7 +119,7 @@ class MainActivity : BaseActivity() {
                     postToServer(it)
                 }
             }
-        }, Crashlytics::logException)
+        }, Firebase.crashlytics::recordException)
     }
 
     private fun setupGauge() {
@@ -384,11 +380,9 @@ class MainActivity : BaseActivity() {
         val fineLocationPermissionNotGranted = ActivityCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) != PERMISSION_GRANTED
         val coarseLocationPermissionNotGranted = ActivityCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION) != PERMISSION_GRANTED
         val phoneStatePermissionNotGranted = ActivityCompat.checkSelfPermission(this, READ_PHONE_STATE) != PERMISSION_GRANTED
-        if (fineLocationPermissionNotGranted && coarseLocationPermissionNotGranted) {
-            if (fineLocationPermissionNotGranted) {
-                requestCoarseLocationPermission()
-                firebaseAnalytics.logEvent("permission_denied", Bundle().apply { putString("permission", ACCESS_FINE_LOCATION) })
-            }
+        if (fineLocationPermissionNotGranted) {
+            requestFineLocationPermission()
+            firebaseAnalytics.logEvent("permission_denied", Bundle().apply { putString("permission", ACCESS_FINE_LOCATION) })
             if (coarseLocationPermissionNotGranted) {
                 firebaseAnalytics.logEvent("permission_denied", Bundle().apply { putString("permission", ACCESS_COARSE_LOCATION) })
             }
@@ -422,8 +416,8 @@ class MainActivity : BaseActivity() {
         }
         dataCollectionActionCreator.collectData()
         isAlreadyRunningTest = false
-        Answers.getInstance().logCustom(CustomEvent("Begin Test"))
-        DataCollectionJob.scheduleJob()
+        FirebaseAnalytics.getInstance(this).logEvent("begin_test", Bundle())
+        DataCollectionJob.scheduleJob(this)
     }
 
     fun endTest() {
@@ -469,7 +463,7 @@ class MainActivity : BaseActivity() {
     }
 
     companion object {
-        val PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 1000
+        val PERMISSIONS_REQUEST_CODE_ACCESS_FINE_LOCATION = 1000
         private val PERMISSIONS_REQUEST_READ_PHONE_STATE = 1001
     }
 }

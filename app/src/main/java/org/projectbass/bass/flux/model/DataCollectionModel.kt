@@ -61,7 +61,7 @@ class DataCollectionModel(private val mContext: Context, private val mRestApi: R
                     mLatitude = it.latitude,
                     mTime = it.time,
                     mSpeed = it.speed.toDouble(),
-                    mProvider = it.provider)
+                    mProvider = it.provider.orEmpty())
         }
         val bandwidthObservable = mSources.bandwidth().subscribeOn(Schedulers.io())
         return bandwidthObservable

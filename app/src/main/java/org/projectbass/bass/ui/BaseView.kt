@@ -3,7 +3,7 @@ package org.projectbass.bass.ui
 import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
-import android.support.annotation.LayoutRes
+import androidx.annotation.LayoutRes
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
@@ -41,7 +41,7 @@ abstract class BaseView : FrameLayout {
         var state = state
         if (state is Bundle) {
             val bundle = state
-            state = bundle.getParcelable<Parcelable>("instanceState")
+            state = bundle.getParcelable("instanceState")!!
             onRestoreInstanceStateBundle(bundle)
         }
         super.onRestoreInstanceState(state)

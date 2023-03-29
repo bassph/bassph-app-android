@@ -12,7 +12,6 @@ import org.projectbass.bass.flux.Utils
 import org.projectbass.bass.flux.action.DataCollectionActionCreator
 import org.projectbass.bass.flux.model.DataCollectionModel
 import org.projectbass.bass.model.Sources
-import org.projectbass.bass.service.BASSJobCreator
 import org.projectbass.bass.utils.AnalyticsUtils
 
 @Module
@@ -37,13 +36,6 @@ class ApplicationModule(private val application: BASS) {
     @Provides @PerApplication
     fun provideSources(context: Context): Sources {
         return Sources(context)
-    }
-
-    @Provides @PerApplication
-    fun provideBASSJobCreator(firebaseAnalytics: FirebaseAnalytics,
-                              dataCollectionActionCreator: DataCollectionActionCreator,
-                              dataCollectionModel: DataCollectionModel): BASSJobCreator {
-        return BASSJobCreator(firebaseAnalytics, dataCollectionActionCreator, dataCollectionModel)
     }
 
     @Provides @PerApplication

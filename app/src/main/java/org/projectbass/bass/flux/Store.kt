@@ -1,6 +1,6 @@
 package org.projectbass.bass.flux
 
-import android.support.annotation.UiThread
+import androidx.annotation.UiThread
 
 import rx.Observable
 import rx.subjects.PublishSubject

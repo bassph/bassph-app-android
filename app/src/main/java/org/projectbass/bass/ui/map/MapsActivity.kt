@@ -6,11 +6,10 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
+import androidx.core.app.ActivityCompat
 import android.view.ViewGroup
 import android.widget.ImageView
 import cn.pedant.SweetAlert.SweetAlertDialog
-import com.crashlytics.android.Crashlytics
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -19,6 +18,8 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import com.google.maps.android.ui.IconGenerator
@@ -104,7 +105,7 @@ class MapsActivity : BaseActivity(), OnMapReadyCallback {
 //                            .snippet("speed: ${it.bandwidth} \nsignal: ${it.signal}")
 //                            .title(it.label))
                 }, {
-                    Crashlytics.logException(it)
+                    Firebase.crashlytics.recordException(it)
                     pDialog.setTitleText("Error!")
                             .setConfirmText("Got It")
                             .setContentText("We're very sorry, something went wrong.\n" +
@@ -133,8 +134,8 @@ class MapsActivity : BaseActivity(), OnMapReadyCallback {
 
     private fun requestCoarseLocationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
-                    MainActivity.PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION)
+            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    MainActivity.PERMISSIONS_REQUEST_CODE_ACCESS_FINE_LOCATION)
         }
     }
 
@@ -150,12 +151,12 @@ class MapsActivity : BaseActivity(), OnMapReadyCallback {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     mMap!!.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), 10f))
-                }, Crashlytics::logException))
+                }, Firebase.crashlytics::recordException))
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
-            MainActivity.PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION -> {
+            MainActivity.PERMISSIONS_REQUEST_CODE_ACCESS_FINE_LOCATION -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     showPresentLocation()
                 }
